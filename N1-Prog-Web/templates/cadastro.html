@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     {% block head %}
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        {% block styles %}
+            <!-- Bootstrap CSS -->
+            <link rel="stylesheet" type="text/css"
+            href="{{url_for('static', filename='css/bootstrap.min.css')}}">
+        {% endblock %}
+
+
+        {% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg bg-light" data-bs-theme="light">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">Navbar</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor03" aria-controls="navbarColor03" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarColor03">
+            <ul class="navbar-nav me-auto">
+              <li class="nav-item">
+                <a class="nav-link" href="/">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="login">Login
+                </a>
+              </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="cadastro">Cadastro
+                        <span class="visually-hidden">(current)</span>
+                    </a>
+              </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="excluir">Excluir</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    <hr>
+    <div class="d-flex justify-content-center align-items-center vh-100">
+        <form class="card p-4 shadow-sm" style="width: 300px;">
+            <h3 class="text-center">Cadastre-se</h3>
+            <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="name" aria-describedby="emailHelp" placeholder="Digite seu nome">
+            </div>
+            <div class="mb-3">
+                <label for="login" class="form-label">Login</label>
+                <input type="email" class="form-control" id="login" aria-describedby="emailHelp" placeholder="Digite seu email">
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Senha</label>
+                <input type="password" class="form-control" id="password" placeholder="Digite sua senha" autocomplete="off">
+            </div>
+            <div class="btn-group-vertical mb-2">
+                <button type="button" class="btn btn-primary">Cadastrar</button>
+            </div>
+        </form>
+    </div>
+<script src="{{ url_for('static', filename='script/index.js') }}"></script>
+</body>
+</html>
+
