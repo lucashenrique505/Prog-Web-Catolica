@@ -28,9 +28,7 @@
                 <a class="nav-link" href="/">Home</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link active" href="login">Login
-                    <span class="visually-hidden">(current)</span>
-                </a>
+                <a class="nav-link" href="login">Login</a>
               </li>
                 <li class="nav-item">
                     <a class="nav-link" href="cadastro">Cadastro</a>
@@ -39,7 +37,9 @@
                 <a class="nav-link" href="excluir">Excluir</a>
               </li>
                 <li class="nav-item">
-                <a class="nav-link" href="atualizar">Atualizar</a>
+                <a class="nav-link active" href="atualizar">Atualizar
+                    <span class="visually-hidden">(current)</span>
+                </a>
               </li>
             </ul>
           </div>
@@ -47,18 +47,22 @@
       </nav>
     <hr>
     <div class="d-flex justify-content-center align-items-center vh-100">
-        <form method="GET" action="/loginUsuario" class="card p-4 shadow-sm" style="width: 300px;">
-            <h3 class="text-center">Faça seu Login</h3>
+        <form method="GET" action="/atualizarUsuario" class="card p-4 shadow-sm" style="width: 300px;">
+            <h3 class="text-center">Atualizar Dados</h3>
+            <div class="mb-3">
+                <label for="name" class="form-label">Nome</label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="Digite seu nome" required>
+            </div>
             <div class="mb-3">
                 <label for="login" class="form-label">Login</label>
                 <input type="email" class="form-control" id="login" name="login" placeholder="Digite seu email" required>
             </div>
             <div class="mb-3">
                 <label for="password" class="form-label">Senha</label>
-                <input type="password" class="form-control" id="password" name="password" placeholder="Digite sua senha" autocomplete="off">
+                <input type="password" class="form-control" id="password" name="password" placeholder="Digite sua senha" required autocomplete="off">
             </div>
             <div class="btn-group-vertical mb-2">
-                <button type="submit" class="btn btn-primary">Entrar</button>
+                <button type="submit" class="btn btn-primary">Cadastrar</button>
             </div>
         </form>
         {% with messages = get_flashed_messages(with_categories=true) %}

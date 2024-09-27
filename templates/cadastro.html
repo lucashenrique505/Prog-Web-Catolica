@@ -1,19 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-     {% block head %}
-        <!-- Required meta tags -->
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-        {% block styles %}
-            <!-- Bootstrap CSS -->
-            <link rel="stylesheet" type="text/css"
-            href="{{url_for('static', filename='css/bootstrap.min.css')}}">
-        {% endblock %}
-
-
-        {% endblock %}
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/bootstrap.min.css')}}">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg bg-light" data-bs-theme="light">
@@ -28,8 +20,7 @@
                 <a class="nav-link" href="/">Home</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="login">Login
-                </a>
+                <a class="nav-link" href="login">Login</a>
               </li>
                 <li class="nav-item">
                     <a class="nav-link active" href="cadastro">Cadastro
@@ -39,30 +30,42 @@
                 <li class="nav-item">
                     <a class="nav-link" href="excluir">Excluir</a>
               </li>
+                <li class="nav-item">
+                <a class="nav-link" href="atualizar">Atualizar</a>
+              </li>
             </ul>
           </div>
         </div>
       </nav>
     <hr>
     <div class="d-flex justify-content-center align-items-center vh-100">
-        <form class="card p-4 shadow-sm" style="width: 300px;">
+        <form method="POST" action="/cadastroUsuario" class="card p-4 shadow-sm" style="width: 300px;">
             <h3 class="text-center">Cadastre-se</h3>
             <div class="mb-3">
-                <label for="name" class="form-label">Name</label>
-                <input type="text" class="form-control" id="name" aria-describedby="emailHelp" placeholder="Digite seu nome">
+                <label for="name" class="form-label">Nome</label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="Digite seu nome" required>
             </div>
             <div class="mb-3">
                 <label for="login" class="form-label">Login</label>
-                <input type="email" class="form-control" id="login" aria-describedby="emailHelp" placeholder="Digite seu email">
+                <input type="email" class="form-control" id="login" name="login" placeholder="Digite seu email" required>
             </div>
             <div class="mb-3">
                 <label for="password" class="form-label">Senha</label>
-                <input type="password" class="form-control" id="password" placeholder="Digite sua senha" autocomplete="off">
+                <input type="password" class="form-control" id="password" name="password" placeholder="Digite sua senha" required autocomplete="off">
             </div>
             <div class="btn-group-vertical mb-2">
-                <button type="button" class="btn btn-primary">Cadastrar</button>
+                <button type="submit" class="btn btn-primary">Cadastrar</button>
             </div>
         </form>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alert alert-{{category}} mt-3">
+                    {% for category, message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
     </div>
 <script src="{{ url_for('static', filename='script/index.js') }}"></script>
 </body>

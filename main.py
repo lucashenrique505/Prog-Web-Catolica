@@ -1,10 +1,12 @@
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
 import sqlite3, hashlib
 from datetime import datetime
 
 app = Flask(__name__)
 
 DATABASE = 'database/database.db'
+
+app.secret_key = 'your_secret_key'
 
 def get_db():
     db = sqlite3.connect(DATABASE)
@@ -26,13 +28,143 @@ def index():
 def login():
     return render_template('login.html', name='login')
 
+@app.route('/loginUsuario', methods=['GET'])
+def loginUsuario():
+    login = request.args.get('login')
+    password = request.args.get('password')
+
+    returnTemplate = redirect(url_for('login'))
+
+    try:
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute('SELECT * FROM users WHERE login = ?', (login,))
+        user = cursor.fetchone()
+        if user:
+
+            status = user[4]
+
+            if not status:
+                flash('User is blocked!', 'danger')
+                return returnTemplate
+
+            hashedPassword = user[2]
+
+            if hashedPassword != hashlib.sha256(password.encode()).hexdigest():
+                flash('Invalid password!', 'danger')
+                return returnTemplate
+        else:
+            flash('User not found!', 'danger')
+            return returnTemplate
+    except sqlite3.Error as e:
+        flash(str(e), 'danger')
+        return returnTemplate
+    finally:
+        db.close()
+        if user:
+            return redirect(url_for('index'))
+        return returnTemplate
+
 @app.route('/cadastro')
 def cadastro():
     return render_template('cadastro.html', name='cadastro')
+@app.route('/cadastroUsuario', methods=['POST'])
+def cadastroUsuario():
+    name = request.form.get('name')
+    login = request.form.get('login')
+    password = request.form.get('password')
+
+    print(login)
+
+    status = True
+    createdAt = datetime.now()
+    updatedAt = datetime.now()
+
+    returnTemplate = redirect(url_for('cadastro'))
+
+    if len(password) < 8:
+        flash('Password: enter at least 8 characters!', 'danger')
+        return returnTemplate
+
+    loginIsValid = valid_use_user(login)
+
+    if not loginIsValid:
+        flash('Login already used!', 'danger')
+        return returnTemplate
+
+    hashedPassword = hashlib.sha256(password.encode()).hexdigest()
+
+    try:
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute(
+            'INSERT INTO users (login, password, name, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)',
+            (login, hashedPassword, name, status, createdAt, updatedAt))
+        db.commit()
+        flash('Registration completed successfully!', 'success')
+        return returnTemplate
+    except sqlite3.Error as e:
+        flash(str(e), 'success')
+        return returnTemplate
+    finally:
+        db.close()
+        return returnTemplate
 
 @app.route('/excluir')
 def excluir():
     return render_template('excluir.html', name='excluir')
+
+@app.route('/excluirUsuario', methods=['GET'])
+def excluirUsuario():
+    login = request.args.get('login')
+    status = False
+    updatedAt = datetime.now()
+
+    returnTemplate = redirect(url_for('excluir'))
+
+    try:
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute('UPDATE users set status = ?, updatedAt = ? WHERE login = ?', (status, updatedAt, login,))
+        db.commit()
+        flash('User deleted successfully!', 'success')
+        return returnTemplate
+    except sqlite3.Error as e:
+        flash(str(e), 'success')
+        return returnTemplate
+    finally:
+        db.close()
+        return returnTemplate
+
+@app.route('/atualizar')
+def atualizar():
+    return render_template('atualizar.html', name='atualizar')
+
+@app.route('/atualizarUsuario', methods=['GET'])
+def atualizarUsuario():
+    name = request.args.get('name')
+    login = request.args.get('login')
+    password = request.args.get('password')
+    updatedAt = datetime.now()
+
+    hashedPassword = hashlib.sha256(password.encode()).hexdigest()
+
+    returnTemplate = redirect(url_for('atualizar'))
+
+    try:
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute('UPDATE users set name = ?, password = ? ,updatedAt = ? WHERE login = ?', (name, hashedPassword, updatedAt, login,))
+        db.commit()
+        flash('User updated successfully!', 'success')
+        return returnTemplate
+    except sqlite3.Error as e:
+        flash(str(e), 'success')
+        return returnTemplate
+    finally:
+        db.close()
+        return returnTemplate
+
 
 @app.route('/initdb')
 def initialize_database():

@@ -38,6 +38,9 @@
                     <a class="nav-link active" href="excluir">Excluir
                         <span class="visually-hidden">(current)</span>
                     </a>
+                <li class="nav-item">
+                    <a class="nav-link" href="atualizar">Atualizar</a>
+              </li>
               </li>
             </ul>
           </div>
@@ -45,16 +48,25 @@
       </nav>
     <hr>
     <div class="d-flex justify-content-center align-items-center vh-100">
-        <form class="card p-4 shadow-sm" style="width: 300px;">
+        <form method="GET" action="/excluirUsuario" class="card p-4 shadow-sm" style="width: 300px;">
             <h3 class="text-center">Excluir Usuário</h3>
             <div class="mb-3">
                 <label for="login" class="form-label">Login</label>
-                <input type="email" class="form-control" id="login" aria-describedby="emailHelp" placeholder="Digite seu email">
+                <input type="email" class="form-control" id="login" name="login" placeholder="Digite seu email" required>
             </div>
             <div class="btn-group-vertical mb-2">
-                <button type="button" class="btn btn-primary">Excluir</button>
+                <button type="submit" class="btn btn-primary">Excluir</button>
             </div>
         </form>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alert alert-{{category}} mt-3">
+                    {% for category, message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
     </div>
 <script src="{{ url_for('static', filename='script/index.js') }}"></script>
 </body>
