@@ -9,7 +9,7 @@ app = Flask(__name__)
 DATABASE = 'database/database.db'
 
 app.secret_key = 'your_secret_key'
-
+# teste
 # Configuração do servidor de e-mail
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
