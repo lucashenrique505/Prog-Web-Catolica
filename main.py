@@ -1,5 +1,7 @@
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
 import sqlite3, hashlib
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from datetime import datetime
 
 app = Flask(__name__)
@@ -7,6 +9,19 @@ app = Flask(__name__)
 DATABASE = 'database/database.db'
 
 app.secret_key = 'your_secret_key'
+
+# Configuração do servidor de e-mail
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USERNAME'] = 'joaoocolombo@gmail.com'
+app.config['MAIL_PASSWORD'] = ''
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+
+mail = Mail(app)
+
+# Serializador para gerar os tokens seguros
+s = URLSafeTimedSerializer(app.secret_key)
 
 def get_db():
     db = sqlite3.connect(DATABASE)
@@ -285,6 +300,55 @@ def patch_user(user_id):
         return jsonify({'error': str(e)}), 500
     finally:
         db.close()
+
+# Rota para solicitar redefinição de senha
+@app.route('/esqueceu_senha', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('login')
+        print(email)
+        try:
+            db = get_db()
+            cursor = db.cursor()
+            cursor.execute('SELECT * FROM users WHERE login = ?', (email,))
+            user = cursor.fetchone()
+            if user:
+                # preparação e envio do email
+                token = s.dumps(email, salt='password_recovery')
+                msg = Message('Redefinição de Senha', sender='joaoocolombo@gmail.com', recipients=[email])
+
+                link = url_for('reset_password', token=token, _external=True)
+                msg.body = f'Clique no link para redefinir a sua senha! {link}'
+                mail.send(msg)
+
+                flash('Um link de recuperação de senha foi enviado para o seu email', category='success')
+
+                return redirect(url_for('index'))
+            else:
+                return flash('User not found!', 'danger')
+        except sqlite3.Error as e:
+            return flash('error' ,'danger')
+        finally:
+            return render_template('esqueceu_senha.html')
+
+    return render_template('esqueceu_senha.html')
+
+# Rota para redefinir a senha
+@app.route('/alterar_senha/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    try:
+        email = s.loads(token, salt='password_recovery', max_age=3600) # 1h
+    except SignatureExpired:
+        return '<h1> O link de redefinição de senha expirou</h1>'
+    except BadSignature:
+        return '<h1>Token inválido</h1>'
+    if request.method == 'POST':
+        new_password = request.form['password']
+        # Neste ponto você faria um update no registro do usuário com a nova senha
+        flash('Sua senha foi redefinida com sucesso!', category='success')
+        return redirect(url_for('index'))
+
+    return render_template('alterar_senha.html')
 
 def valid_use_user(login):
     try:
