@@ -35,12 +35,12 @@
                     <a class="nav-link" href="cadastro">Cadastro</a>
               </li>
                 <li class="nav-item">
-                    <a class="nav-link active" href="excluir">Excluir</a>
+                    <a class="nav-link" href="excluir">Excluir</a>
                 <li class="nav-item">
                     <a class="nav-link" href="atualizar">Atualizar</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link active" href="esqueceu_senha">Esqueci minha Senha</a>
+                <a class="nav-link" href="esqueceu_senha">Esqueci minha Senha</a>
               </li>
             </ul>
           </div>
@@ -48,7 +48,7 @@
       </nav>
     <hr>
     <div class="d-flex justify-content-center align-items-center vh-100">
-        <form method="GET" action="/alterar_senha" class="card p-4 shadow-sm" style="width: 300px;">
+        <form method="POST" action="/alterar_senha/{{ token }}" class="card p-4 shadow-sm" style="width: 300px;">
             <h3 class="text-center">Alterar Senha</h3>
             <div class="mb-3">
                 <label for="password" class="form-label">Senha</label>
@@ -56,7 +56,7 @@
             </div>
             <div class="mb-3">
                 <label for="password" class="form-label">Confirme sua Senha</label>
-                <input type="password" class="form-control" id="password" name="password" placeholder="Digite sua senha novamente" required autocomplete="off">
+                <input type="password" class="form-control" id="password2" name="password2" placeholder="Digite sua senha novamente" required autocomplete="off">
             </div>
             <div class="btn-group-vertical mb-2">
                 <button type="submit" class="btn btn-primary">Redefinir</button>

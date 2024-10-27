@@ -89,8 +89,6 @@ def cadastroUsuario():
     login = request.form.get('login')
     password = request.form.get('password')
 
-    print(login)
-
     status = True
     createdAt = datetime.now()
     updatedAt = datetime.now()
@@ -306,7 +304,6 @@ def patch_user(user_id):
 def forgot_password():
     if request.method == 'POST':
         email = request.form.get('login')
-        print(email)
         try:
             db = get_db()
             cursor = db.cursor()
@@ -336,19 +333,39 @@ def forgot_password():
 # Rota para redefinir a senha
 @app.route('/alterar_senha/<token>', methods=['GET', 'POST'])
 def reset_password(token):
+
     try:
-        email = s.loads(token, salt='password_recovery', max_age=3600) # 1h
+        login = s.loads(token, salt='password_recovery', max_age=3600) # 1h
     except SignatureExpired:
         return '<h1> O link de redefinição de senha expirou</h1>'
     except BadSignature:
         return '<h1>Token inválido</h1>'
     if request.method == 'POST':
-        new_password = request.form['password']
-        # Neste ponto você faria um update no registro do usuário com a nova senha
-        flash('Sua senha foi redefinida com sucesso!', category='success')
-        return redirect(url_for('index'))
 
-    return render_template('alterar_senha.html')
+        password = request.form.get('password')
+        password2 = request.form.get('password2')
+
+        if password != password2:
+            flash('As senhas precisam ser iguais!', 'danger')
+            return render_template('alterar_senha.html', token=token)
+
+        updatedAt = datetime.now()
+        hashedPassword = hashlib.sha256(password.encode()).hexdigest()
+
+        try:
+            db = get_db()
+            cursor = db.cursor()
+            cursor.execute('UPDATE users set password = ? ,updatedAt = ? WHERE login = ?',
+                           (hashedPassword, updatedAt, login,))
+            db.commit()
+            flash('Sua senha foi redefinida com sucesso!', category='success')
+            return redirect(url_for('index'))
+        except sqlite3.Error as e:
+            return flash('error', 'danger')
+        finally:
+            return redirect(url_for('index'))
+
+    return render_template('alterar_senha.html', token=token)
 
 def valid_use_user(login):
     try:
