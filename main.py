@@ -178,6 +178,30 @@ def atualizarUsuario():
         db.close()
         return returnTemplate
 
+@app.route('/registros')
+def registros():
+    # Parâmetros de paginação
+    page = request.args.get('page', 1, type=int)
+    per_page = 2  # Número de registros por página
+    offset = (page - 1) * per_page
+
+    # Conectar ao banco de dados e buscar os registros com base na página e no limite
+    db = get_db()
+    cursor = db.cursor()
+    # Consultar o total de registros
+    cursor.execute("SELECT COUNT(*) AS total FROM users")
+    total_records = cursor.fetchone()['total']
+
+    # Consultar registros específicos para a página atual
+    cursor.execute("SELECT * FROM users LIMIT ? OFFSET ?", (per_page, offset))
+    registros = cursor.fetchall()
+
+    db.close()
+
+    # Calcular o total de páginas
+    total_pages = (total_records + per_page - 1) // per_page
+
+    return render_template('registros.html', registros=registros, page=page, total_pages=total_pages)
 
 @app.route('/initdb')
 def initialize_database():

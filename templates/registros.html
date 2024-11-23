@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
      {% block head %}
@@ -15,7 +15,7 @@
 
         {% endblock %}
 </head>
-<body>
+  <body>
     <nav class="navbar navbar-expand-lg bg-light" data-bs-theme="light">
         <div class="container-fluid">
           <a class="navbar-brand" href="#">Navbar</a>
@@ -28,9 +28,7 @@
                 <a class="nav-link" href="/">Home</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link active" href="login">Login
-                    <span class="visually-hidden">(current)</span>
-                </a>
+                <a class="nav-link" href="login">Login</a>
               </li>
                 <li class="nav-item">
                     <a class="nav-link" href="cadastro">Cadastro</a>
@@ -45,39 +43,42 @@
                 <a class="nav-link" href="esqueceu_senha">Esqueci minha Senha</a>
               </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="registros">Registros</a>
+                <a class="nav-link active" href="registros">Registros
+                    <span class="visually-hidden">(current)</span>
+                </a>
               </li>
             </ul>
           </div>
         </div>
       </nav>
     <hr>
-    <div class="d-flex justify-content-center align-items-center vh-100">
-        <form method="GET" action="/loginUsuario" class="card p-4 shadow-sm" style="width: 300px;">
-            <h3 class="text-center">Faça seu Login</h3>
-            <div class="mb-3">
-                <label for="login" class="form-label">Login</label>
-                <input type="email" class="form-control" id="login" name="login" placeholder="Digite seu email" required>
-            </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Senha</label>
-                <input type="password" class="form-control" id="password" name="password" placeholder="Digite sua senha" autocomplete="off">
-            </div>
-            <div class="btn-group-vertical mb-2">
-                <button type="submit" class="btn btn-primary">Entrar</button>
-            </div>
-        </form>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="alert alert-{{category}} mt-3">
-                    {% for category, message in messages %}
-                        {{ message }}
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
-    </div>
-<script src="{{ url_for('static', filename='script/index.js') }}"></script>
-</body>
-</html>
 
+    <table>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+      </tr>
+      {% for registro in registros %}
+      <tr>
+        <td>{{ registro.id }}</td>
+        <td>{{ registro.name }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+
+    <div>
+      <!-- Botão para a página anterior -->
+      {% if page > 1 %}
+        <a href="{{ url_for('registros', page=page-1) }}">Previous</a>
+      {% endif %}
+
+      <!-- Exibe o número da página atual -->
+      <span>Page {{ page }} of {{ total_pages }}</span>
+
+      <!-- Botão para a próxima página -->
+      {% if page < total_pages %}
+        <a href="{{ url_for('registros', page=page+1) }}">Next</a>
+      {% endif %}
+    </div>
+  </body>
+</html>
