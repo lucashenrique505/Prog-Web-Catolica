@@ -9,13 +9,11 @@
         {% block styles %}
             <!-- Bootstrap CSS -->
             <link rel="stylesheet" type="text/css"
-            href="{{url_for('static', filename='css/bootstrap.min.css')}}">
+            href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
         {% endblock %}
-
-
-        {% endblock %}
+     {% endblock %}
 </head>
-  <body>
+<body>
     <nav class="navbar navbar-expand-lg bg-light" data-bs-theme="light">
         <div class="container-fluid">
           <a class="navbar-brand" href="#">Navbar</a>
@@ -24,61 +22,51 @@
           </button>
           <div class="collapse navbar-collapse" id="navbarColor03">
             <ul class="navbar-nav me-auto">
-              <li class="nav-item">
-                <a class="nav-link" href="/">Home</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="login">Login</a>
-              </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="cadastro">Cadastro</a>
-              </li>
-                <li class="nav-item">
-                <a class="nav-link" href="excluir">Excluir</a>
-              </li>
-                <li class="nav-item">
-                <a class="nav-link" href="atualizar">Atualizar</a>
-              </li>
-                <li class="nav-item">
-                <a class="nav-link" href="esqueceu_senha">Esqueci minha Senha</a>
-              </li>
-                <li class="nav-item">
-                <a class="nav-link active" href="registros">Registros
-                    <span class="visually-hidden">(current)</span>
-                </a>
-              </li>
+              <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+              <li class="nav-item"><a class="nav-link" href="login">Login</a></li>
+              <li class="nav-item"><a class="nav-link" href="cadastro">Cadastro</a></li>
+              <li class="nav-item"><a class="nav-link" href="excluir">Excluir</a></li>
+              <li class="nav-item"><a class="nav-link" href="atualizar">Atualizar</a></li>
+              <li class="nav-item"><a class="nav-link" href="esqueceu_senha">Esqueci minha Senha</a></li>
+              <li class="nav-item"><a class="nav-link active" href="registros">Registros<span class="visually-hidden">(current)</span></a></li>
+                <li class="nav-item"><a class="nav-link" href="logout">Logout</a></li>
             </ul>
           </div>
         </div>
-      </nav>
+    </nav>
     <hr>
 
-    <table>
-      <tr>
-        <th>ID</th>
-        <th>Name</th>
-      </tr>
-      {% for registro in registros %}
-      <tr>
-        <td>{{ registro.id }}</td>
-        <td>{{ registro.name }}</td>
-      </tr>
-      {% endfor %}
-    </table>
+    <div class="container my-4">
+        <!-- Grid para exibir os registros -->
+        <div class="row g-3">
+            {% for registro in registros %}
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">ID: {{ registro.id }}</h5>
+                        <p class="card-text">Name: {{ registro.name }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
 
-    <div>
-      <!-- Botão para a página anterior -->
-      {% if page > 1 %}
-        <a href="{{ url_for('registros', page=page-1) }}">Previous</a>
-      {% endif %}
+        <!-- Paginação -->
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            {% if page > 1 %}
+            <a class="btn btn-primary" href="{{ url_for('registros', page=page-1) }}">Previous</a>
+            {% else %}
+            <button class="btn btn-primary disabled">Previous</button>
+            {% endif %}
 
-      <!-- Exibe o número da página atual -->
-      <span>Page {{ page }} of {{ total_pages }}</span>
+            <span>Page {{ page }} of {{ total_pages }}</span>
 
-      <!-- Botão para a próxima página -->
-      {% if page < total_pages %}
-        <a href="{{ url_for('registros', page=page+1) }}">Next</a>
-      {% endif %}
+            {% if page < total_pages %}
+            <a class="btn btn-primary" href="{{ url_for('registros', page=page+1) }}">Next</a>
+            {% else %}
+            <button class="btn btn-primary disabled">Next</button>
+            {% endif %}
+        </div>
     </div>
-  </body>
+</body>
 </html>

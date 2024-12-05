@@ -1,14 +1,51 @@
-from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
+from flask import Flask, jsonify, render_template, request, redirect, url_for, flash, Response
 import sqlite3, hashlib
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from datetime import datetime
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_principal import Principal, Permission, RoleNeed, identity_loaded, UserNeed, Identity, AnonymousIdentity, identity_changed
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'
+
+login_manager = LoginManager(app)
+login_manager.login_view = "login"
+
+principals = Principal(app)
+
+admin_permission = Permission(RoleNeed("admin"))
+user_permission = Permission(RoleNeed("user"))
+
+class User(UserMixin):
+    def __init__(self, id, login, role):
+        self.id = id
+        self.login = login
+        self.role = role
+
+    def is_admin(self):
+        return self.role == 'admin'
+
+@login_manager.user_loader
+def load_user(user_id):
+    try:
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute('SELECT id, login, role FROM users WHERE id = ?', (user_id,))
+        user = cursor.fetchone()
+        if user:
+            return User(user['id'], user['login'], user['role'])
+    finally:
+        db.close()
+    return None
+
+@identity_loaded.connect_via(app)
+def on_identity_loaded(sender, identity):
+    if current_user.is_authenticated: # Verifica se o usuário está autenticado
+        identity.provides.add(UserNeed(current_user.id)) # Adiciona o ID do usuário à identidade
+        identity.provides.add(RoleNeed(current_user.role))
 
 DATABASE = 'database/database.db'
-
-app.secret_key = 'your_secret_key'
 
 # Configuração do servidor de e-mail
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -36,8 +73,9 @@ def init_db():
         db.commit()
 
 @app.route('/')
+@login_required
 def index():
-    return render_template('index.html', name='index')
+    return render_template('index.html', name="index")
 
 @app.route('/login')
 def login():
@@ -68,6 +106,11 @@ def loginUsuario():
             if hashedPassword != hashlib.sha256(password.encode()).hexdigest():
                 flash('Invalid password!', 'danger')
                 return returnTemplate
+
+            if hashedPassword == hashlib.sha256(password.encode()).hexdigest():
+                user_obj = User(user['id'], user['login'], user['role'])
+                login_user(user_obj)  # Registra o usuário na sessão
+                return redirect(url_for('index'))
         else:
             flash('User not found!', 'danger')
             return returnTemplate
@@ -92,6 +135,7 @@ def cadastroUsuario():
     status = True
     createdAt = datetime.now()
     updatedAt = datetime.now()
+    role = 'user'
 
     returnTemplate = redirect(url_for('cadastro'))
 
@@ -111,8 +155,8 @@ def cadastroUsuario():
         db = get_db()
         cursor = db.cursor()
         cursor.execute(
-            'INSERT INTO users (login, password, name, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)',
-            (login, hashedPassword, name, status, createdAt, updatedAt))
+            'INSERT INTO users (login, password, name, status, role, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            (login, hashedPassword, name, status,role, createdAt, updatedAt))
         db.commit()
         flash('Registration completed successfully!', 'success')
         return returnTemplate
@@ -122,6 +166,11 @@ def cadastroUsuario():
     finally:
         db.close()
         return returnTemplate
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
 
 @app.route('/excluir')
 def excluir():
@@ -167,7 +216,7 @@ def atualizarUsuario():
     try:
         db = get_db()
         cursor = db.cursor()
-        cursor.execute('UPDATE users set name = ?, password = ? ,updatedAt = ? WHERE login = ?', (name, hashedPassword, updatedAt, login,))
+        cursor.execute('UPDATE users set name = ?, password = ?, updatedAt = ? WHERE login = ?', (name, hashedPassword, updatedAt, login,))
         db.commit()
         flash('User updated successfully!', 'success')
         return returnTemplate
@@ -179,10 +228,15 @@ def atualizarUsuario():
         return returnTemplate
 
 @app.route('/registros')
+@login_required
 def registros():
+    print(current_user.is_admin())
+    if not current_user.is_admin():
+        return redirect(url_for('forbidden'))
+
     # Parâmetros de paginação
     page = request.args.get('page', 1, type=int)
-    per_page = 2  # Número de registros por página
+    per_page = 4  # Número de registros por página
     offset = (page - 1) * per_page
 
     # Conectar ao banco de dados e buscar os registros com base na página e no limite
@@ -323,8 +377,30 @@ def patch_user(user_id):
     finally:
         db.close()
 
+@app.route('/users/changeRole/<int:user_id>', methods=['PATCH'])
+def patch_user_role(user_id):
+
+    role = request.json.get('role')
+
+    if role == None:
+        return jsonify({'error': 'roe: most not be null!'})
+
+    updatedAt = datetime.now()
+
+    try:
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute('UPDATE users set role = ?, updatedAt = ? WHERE id = ?', (role, updatedAt, user_id,))
+        db.commit()
+        return jsonify({'message': 'User updated!'})
+    except sqlite3.Error as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        db.close()
+
 # Rota para solicitar redefinição de senha
 @app.route('/esqueceu_senha', methods=['GET', 'POST'])
+@login_required
 def forgot_password():
     if request.method == 'POST':
         email = request.form.get('login')
@@ -403,6 +479,10 @@ def valid_use_user(login):
             return True
     finally:
         db.close()
+
+@app.route("/forbidden")
+def forbidden():
+    return render_template("403.html"), 403
 
 if __name__ == '__main__':
     app.run(debug=True)

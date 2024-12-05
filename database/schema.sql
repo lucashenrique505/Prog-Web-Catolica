@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
   `password` varchar(45) NOT NULL,
   `name` varchar(45) NOT NULL,
   `status` boolean NOT NULL,
+  role VARCHAR(10) DEFAULT 'user',
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
   updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
