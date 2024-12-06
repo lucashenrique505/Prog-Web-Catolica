@@ -6,3 +6,5 @@ py -3 -m venv .venv
 ### Configure também seu próprio MAIL_PASSWORD
 ### Instale os seguintes pacotes
 'pip install Flask-Login' e 'pip install Flask-Principal'
+### Testando páginas bloqueadas
+Para acessas as páginas bloqueadas é necessário estar logado como administrador, para fazer isso basta utilizar o email 'admin@gmail' e a senha 'adminpass', para logar com um usuário normal pode ser utilizado 'lucas@gmail' e 'lucaspass'.
